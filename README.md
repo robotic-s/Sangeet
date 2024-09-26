@@ -62,6 +62,68 @@ Sangeet is a feature-rich music platform that brings a personalized and immersiv
 - Explore features like  listening history, and audio visualizations and much more.
 - Adjust settings and toggle dark mode using the buttons in the top right corner.
 
+
+
+
+
+
+## Getting Started with Docker
+
+To run SangeetPro using Docker, follow these steps:
+
+1. Pull the Docker image:
+   ```
+   docker pull universerobotics/sangeetvr1:latest
+   ```
+
+2. Create a `.env` file in the same directory where you'll run the Docker command. Add the following environment variables to the file:
+
+   ```
+   HOST=your_host
+   MAIL=your_mail
+   PASS=your_google_app_password
+   SPOTIFYID=your_spotify_client_id
+   SPOTIFYSECRET=your_spotify_client_secret
+   ```
+
+   Replace the values with your actual configuration:
+   - `HOST`: Your host, e.g., `localhost:80`, `:4500`, `127.0.0.1:80`, or `192.168.0.1:4500` (include your actual port)
+   - `MAIL`: Your email address for sending OTPs
+   - `PASS`: Your Google Mail app password
+   - `SPOTIFYID`: Your Spotify client ID
+   - `SPOTIFYSECRET`: Your Spotify client secret
+
+3. Run the Docker container:
+   ```
+   docker run -d \
+     --name sangeetpro \
+     -p 6700:80 \
+     --env-file .env \
+     --restart always \
+     universerobotics/sangeetvr1:latest
+   ```
+
+   This command does the following:
+   - Runs the container in detached mode (`-d`)
+   - Names the container "sangeetpro"
+   - Maps port 6700 on the host to port 80 in the container
+   - Uses the environment variables from the `.env` file
+   - Sets the container to always restart
+   - Uses the latest version of the SangeetPro image
+
+4. Access the application by opening a web browser and navigating to `http://localhost:6700` (or the appropriate host and port you've configured).
+
+## Troubleshooting
+
+If you encounter any issues, please check the following:
+- Ensure Docker is installed and running on your system
+- Verify that the `.env` file is in the correct location and contains valid information
+- Check that the required ports are not being used by other applications
+
+
+
+
+
 ## Contributing
 
 Contributions to Sangeet are welcome! Please feel free to submit a Pull Request.
