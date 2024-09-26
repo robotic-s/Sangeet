@@ -97,7 +97,7 @@ To run SangeetPro using Docker, follow these steps:
    ```
    docker run -d \
      --name sangeetpro \
-     -p same_as_in_env:80 \
+     -p same_as_host:80 \
      --env-file .env \
      --restart always \
      universerobotics/sangeetvr1:latest
