@@ -1,0 +1,29 @@
+use these to run with docker
+
+add a .env and add all necessary details in format
+
+
+
+
+host = "your host eg : -- localhost:80 or :4500 , 127.0.0.1:80 , 192.168.0.1:4500 (add you actual port)..."
+
+
+
+
+
+
+mail = "your mail for sending otp's"
+
+
+pass = "google mail app passwords"
+
+
+
+spotifyid = "your spotify client id"
+
+spotifysecret = "your spotify client secret"
+
+
+
+
+docker run -d   --name sangeetpro   -p 6700:80   --env-file .env   --restart always   universerobotics/sangeetvr1:latest
