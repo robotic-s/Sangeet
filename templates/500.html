@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internal Server Error</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #videoContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #errorLabel {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="videoContainer">
+        <video id="errorVideo" autoplay playsinline>
+            <source src="/assets/system/500" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <div id="errorLabel">500 Server Error</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var video = document.getElementById('errorVideo');
+            
+            // Function to start video with sound and go full screen
+            function startVideo() {
+                video.muted = false;
+                video.play().then(() => {
+                    if (video.requestFullscreen) {
+                        video.requestFullscreen();
+                    } else if (video.mozRequestFullScreen) { // Firefox
+                        video.mozRequestFullScreen();
+                    } else if (video.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                        video.webkitRequestFullscreen();
+                    } else if (video.msRequestFullscreen) { // IE/Edge
+                        video.msRequestFullscreen();
+                    }
+                }).catch(error => {
+                    console.error("Autoplay or unmute was prevented:", error);
+                    // If autoplay with sound fails, try again with muted video
+                    video.muted = true;
+                    video.play();
+                });
+            }
+
+            // Try to start video immediately
+            startVideo();
+
+            // Also try to start on user interaction (click/touch) as fallback
+            document.body.addEventListener('click', startVideo, {once: true});
+            document.body.addEventListener('touchstart', startVideo, {once: true});
+
+            // Loop the video
+            video.addEventListener('ended', function() {
+                video.currentTime = 0;
+                video.play();
+            });
+        });
+    </script>
+</body>
+</html>

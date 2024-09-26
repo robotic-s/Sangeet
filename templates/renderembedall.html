@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed Sangeet Player - {{ title }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/20/embeder">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="/asset/watermark" alt="Sangeet Player Logo" class="logo">
+            </div>
+            <h1><i class="fas fa-music"></i> Sangeet One Embed !!</h1>
+            <p>Elevate your website with seamless music integration</p>
+        </div>
+        <div class="main-content">
+            <div class="embed-card fade-in-up">
+                <iframe id="sangeetPlayer" src="{{hostid}}/v3/songs/sangeet/latest/embed/{{ video_id }}" frameborder="0" allowtransparency="true" allow="encrypted-media" scrolling="no"></iframe>
+                <div class="song-info">
+                    <h2>{{ title }}</h2>
+                    <p><i class="fas fa-user"></i> {{ artist_name }}</p>
+                </div>
+            </div>
+            <div class="code-section fade-in-up">
+                <div class="code-card">
+                    <button class="copy-button" onclick="copyCode('mainCode')">Copy Code</button>
+                    <pre id="mainCode">&lt;iframe id="sangeetPlayer" src="{{ hostid }}/v3/songs/sangeet/latest/embed/{{ video_id }}" frameborder="0" allowtransparency="true" allow="encrypted-media" scrolling="no" width="100%" height="140"&gt;&lt;/iframe&gt;</pre>
+                </div>
+                <div class="instructions">
+                    <h3><i class="fas fa-code"></i> How to Embed</h3>
+                    <ol>
+                        <li>Click the "Copy Code" button above to copy the embed code.</li>
+                        <li>Paste the code into your website's HTML where you want the player to appear.</li>
+                        <li>Adjust the width and height attributes as needed to fit your design.</li>
+                        <li>Each embed uses a unique token. Generate a new one for each use.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="instructions fade-in-up">
+            <h3><i class="fas fa-ruler"></i> Size Variations</h3>
+            <p>Customize the player size to match your website's layout:</p>
+        </div>
+        <div class="size-examples">
+            <div class="size-example fade-in-up">
+                <h4>Compact (300x80)</h4>
+                <div class="iframe-container">
+                    <iframe src="{{hostid}}/v3/songs/sangeet/latest/embed2/{{ video_id }}" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media" scrolling="no"></iframe>
+                </div>
+                <p>Ideal for sidebars or narrow spaces</p>
+                <div class="code-card">
+                    <button class="copy-button" onclick="copyCode('compactCode')">Copy Code</button>
+                    <pre id="compactCode">&lt;iframe src="{{ hostid }}/v3/songs/sangeet/latest/embed2/{{ video_id }}" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media" scrolling="no"&gt;&lt;/iframe&gt;</pre>
+                </div>
+            </div>
+            <div class="size-example fade-in-up">
+                <h4>Standard (450x100)</h4>
+                <div class="iframe-container">
+                    <iframe src="{{hostid}}/v3/songs/sangeet/latest/embed2/{{ video_id }}" width="450" height="100" frameborder="0" allowtransparency="true" allow="encrypted-media" scrolling="no"></iframe>
+                </div>
+                <p>Perfect for blog posts or content areas</p>
+                <div class="code-card">
+                    <button class="copy-button" onclick="copyCode('standardCode')">Copy Code</button>
+                    <pre id="standardCode">&lt;iframe src="{{ hostid }}/v3/songs/sangeet/latest/embed2/{{ video_id }}" width="450" height="100" frameborder="0" allowtransparency="true" allow="encrypted-media" scrolling="no"&gt;&lt;/iframe&gt;</pre>
+                </div>
+            </div>
+            <div class="size-example fade-in-up">
+                <h4>Widescreen (600x120)</h4>
+                <div class="iframe-container">
+                    <iframe src="{{hostid}}/v3/songs/sangeet/latest/embed2/{{ video_id }}" width="600" height="120" frameborder="0" allowtransparency="true" allow="encrypted-media" scrolling="no"></iframe>
+                </div>
+                <p>Great for full-width layouts or feature sections</p>
+                <div class="code-card">
+                    <button class="copy-button" onclick="copyCode('widescreenCode')">Copy Code</button>
+                    <pre id="widescreenCode">&lt;iframe src="{{ hostid }}/v3/songs/sangeet/latest/embed2/{{ video_id }}" width="600" height="120" frameborder="0" allowtransparency="true" allow="encrypted-media" scrolling="no"&gt;&lt;/iframe&gt;</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+       var _0x351c61=_0x90ca;(function(_0x2f1ed4,_0x3a2f76){var _0x275f70=_0x90ca,_0x185c53=_0x2f1ed4();while(!![]){try{var _0x4e3cca=parseInt(_0x275f70(0x1b3))/(-0x938+-0xdc7+-0x5c0*-0x4)+parseInt(_0x275f70(0x1a9))/(0x15b8+-0x11*-0x239+0x13d5*-0x3)*(-parseInt(_0x275f70(0x198))/(-0x196e+0x96e*0x3+-0xf3*0x3))+-parseInt(_0x275f70(0x199))/(-0x11f+-0x2043+0x2166)+parseInt(_0x275f70(0x19c))/(-0x2ef*0x5+0x890*0x4+-0x1390)*(parseInt(_0x275f70(0x18d))/(0xeea+-0x1*0xaf6+-0x2*0x1f7))+-parseInt(_0x275f70(0x1af))/(-0x1de*-0x7+-0x89e+-0x46d)+-parseInt(_0x275f70(0x1b0))/(-0x1*-0x1073+0x1d3+-0x91f*0x2)*(-parseInt(_0x275f70(0x1b2))/(-0x25*0xc7+0x2*-0x76d+0x4a*0x97))+-parseInt(_0x275f70(0x1b8))/(-0x2b*-0x7+0xb39+0xe2*-0xe)*(-parseInt(_0x275f70(0x1a2))/(0x445*-0x1+0xba7+-0x757*0x1));if(_0x4e3cca===_0x3a2f76)break;else _0x185c53['push'](_0x185c53['shift']());}catch(_0x4cb8ee){_0x185c53['push'](_0x185c53['shift']());}}}(_0x6bbc,-0x4a699+-0x100c76+0x1fb128));function _0x6bbc(){var _0x2f6fde=['addRange','zysgC','3|4|1|8|2|','6206781yFZOQg','1201808KFVBPH','.fade-in-u','9SyczGl','36523LijCIL','createRang','forEach','ting','layState','3470pnYUTi','RRleZ','observe','animationP','stener','addEventLi','selectNode','eRUkb','PyHTu','6ASHnbD','unobserve','isIntersec','ById','DOMContent','copy','Copied!','jecXQ','torAll','querySelec','Loaded','696bPcSNr','2488460uGyqGS','riWWn','textConten','1391995XosIJn','running','style','ltfBP','RwGME','split','58179DPOkin','removeAllR','getElement','getSelecti','target','10|0|5|7|6','execComman','614dBpgjq','anges','paused'];_0x6bbc=function(){return _0x2f6fde;};return _0x6bbc();}function copyCode(_0x4c11a4){var _0x36caf9=_0x90ca,_0x3a201a={'riWWn':_0x36caf9(0x1ae)+_0x36caf9(0x1a7)+'|9','eRUkb':_0x36caf9(0x193),'RRleZ':function(_0x4891cb,_0x51fafd,_0x50baba){return _0x4891cb(_0x51fafd,_0x50baba);},'RwGME':_0x36caf9(0x192)},_0x60fa9f=_0x3a201a[_0x36caf9(0x19a)][_0x36caf9(0x1a1)]('|'),_0x45e4ee=-0x577*-0x7+-0x3d2*-0x4+-0x3589*0x1;while(!![]){switch(_0x60fa9f[_0x45e4ee++]){case'0':window[_0x36caf9(0x1a5)+'on']()[_0x36caf9(0x1a3)+_0x36caf9(0x1aa)]();continue;case'1':_0x303e03[_0x36caf9(0x18a)](_0xcca66e);continue;case'2':window[_0x36caf9(0x1a5)+'on']()[_0x36caf9(0x1ac)](_0x303e03);continue;case'3':var _0xcca66e=document[_0x36caf9(0x1a4)+_0x36caf9(0x190)](_0x4c11a4);continue;case'4':var _0x303e03=document[_0x36caf9(0x1b4)+'e']();continue;case'5':var _0x1cd0fc=event[_0x36caf9(0x1a6)];continue;case'6':_0x1cd0fc[_0x36caf9(0x19b)+'t']=_0x3a201a[_0x36caf9(0x18b)];continue;case'7':var _0x10c2f2=_0x1cd0fc[_0x36caf9(0x19b)+'t'];continue;case'8':window[_0x36caf9(0x1a5)+'on']()[_0x36caf9(0x1a3)+_0x36caf9(0x1aa)]();continue;case'9':_0x3a201a[_0x36caf9(0x185)](setTimeout,()=>{var _0x3af742=_0x36caf9;_0x1cd0fc[_0x3af742(0x19b)+'t']=_0x10c2f2;},0x16d7*0x1+0x141*-0x18+0xf11);continue;case'10':document[_0x36caf9(0x1a8)+'d'](_0x3a201a[_0x36caf9(0x1a0)]);continue;}break;}}function _0x90ca(_0x48b760,_0x2fe1cf){var _0x224f36=_0x6bbc();return _0x90ca=function(_0x33f92d,_0x336fb9){_0x33f92d=_0x33f92d-(-0x538+-0x2673+-0xf1*-0x30);var _0x15776b=_0x224f36[_0x33f92d];return _0x15776b;},_0x90ca(_0x48b760,_0x2fe1cf);}document[_0x351c61(0x189)+_0x351c61(0x188)](_0x351c61(0x191)+_0x351c61(0x197),_0x275f6d=>{var _0x34e974=_0x351c61,_0x3d48ff={'ltfBP':_0x34e974(0x19d),'zysgC':_0x34e974(0x1ab),'PyHTu':_0x34e974(0x1b1)+'p'};const _0x273967=document[_0x34e974(0x196)+_0x34e974(0x195)](_0x3d48ff[_0x34e974(0x18c)]),_0x5ec559=new IntersectionObserver(_0x25a791=>{var _0x25b7f6=_0x34e974,_0x1ac1bf={'jecXQ':_0x3d48ff[_0x25b7f6(0x19f)]};_0x25a791[_0x25b7f6(0x1b5)](_0x4e7287=>{var _0x3e49ff=_0x25b7f6;_0x4e7287[_0x3e49ff(0x18f)+_0x3e49ff(0x1b6)]&&(_0x4e7287[_0x3e49ff(0x1a6)][_0x3e49ff(0x19e)][_0x3e49ff(0x187)+_0x3e49ff(0x1b7)]=_0x1ac1bf[_0x3e49ff(0x194)],_0x5ec559[_0x3e49ff(0x18e)](_0x4e7287[_0x3e49ff(0x1a6)]));});},{'threshold':0.1});_0x273967[_0x34e974(0x1b5)](_0x1fb8d2=>{var _0x482a54=_0x34e974;_0x1fb8d2[_0x482a54(0x19e)][_0x482a54(0x187)+_0x482a54(0x1b7)]=_0x3d48ff[_0x482a54(0x1ad)],_0x5ec559[_0x482a54(0x186)](_0x1fb8d2);});});
+    </script>
+</body>
+</html>

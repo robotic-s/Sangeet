@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
+    <style>
+        body {
+            font-family: 'Google Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f1f3f4;
+            color: #202124;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        h1 {
+            color: #1a73e8;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #5f6368;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        button {
+            background-color: #1a73e8;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1765cc;
+        }
+        .delete-account {
+            background-color: #ea4335;
+            margin-top: 24px;
+        }
+        .delete-account:hover {
+            background-color: #d93025;
+        }
+        a {
+            color: #1a73e8;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 24px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        #upload-demo {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+        }
+        .cr-slider-wrap {
+            margin-top: 15px;
+        }
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 300px;
+            z-index: 1000;
+        }
+        .flash-message {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .flash-message.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .flash-message.success {
+            background-color: #e6f4ea;
+            color: #1e8e3e;
+        }
+        .flash-message.error {
+            background-color: #fce8e6;
+            color: #d93025;
+        }
+        .close-flash {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Profile</h1>
+        <form id="profile-form" action="{{ url_for('profile') }}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" value="{{ user['name'] }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="{{ user['email'] }}" required>
+            </div>
+            <div class="form-group">
+                <label for="profile_pic">Profile Picture:</label>
+                <input type="file" id="profile_pic" name="profile_pic" accept="image/*">
+            </div>
+            <div id="upload-demo"></div>
+            <input type="hidden" id="cropped_profile_pic" name="profile_pic">
+            <button type="submit">Update Profile</button>
+        </form>
+        <form action="{{ url_for('delete_account') }}" method="post" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+            <button type="submit" class="delete-account">Delete Account</button>
+        </form>
+        <a href="{{ url_for('dashboard') }}"><span class="material-icons">arrow_back</span> Back to Dashboard</a>
+    </div>
+
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                        <button class="close-flash">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <script>
+        var uploadCrop;
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            uploadCrop = new Croppie(document.getElementById('upload-demo'), {
+                viewport: { width: 200, height: 200, type: 'circle' },
+                boundary: { width: 300, height: 300 },
+                showZoomer: true,
+                enableOrientation: true
+            });
+    
+            document.getElementById('profile_pic').addEventListener('change', function () { 
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    uploadCrop.bind({
+                        url: e.target.result
+                    }).then(function(){
+                        console.log('Croppie bind complete');
+                    });
+                }
+                reader.readAsDataURL(this.files[0]);
+            });
+    
+            document.getElementById('profile-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                uploadCrop.result({
+                    type: 'base64',
+                    size: 'viewport',
+                    format: 'png'
+                }).then(function(base64) {
+                    document.getElementById('cropped_profile_pic').value = base64;
+                    e.target.submit();
+                });
+            });
+
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(message) {
+                setTimeout(function() {
+                    message.classList.add('show');
+                }, 100);
+                
+                const closeButton = message.querySelector('.close-flash');
+                closeButton.addEventListener('click', function() {
+                    message.classList.remove('show');
+                    setTimeout(function() {
+                        message.remove();
+                    }, 300);
+                });
+
+                setTimeout(function() {
+                    message.classList.remove('show');
+                    setTimeout(function() {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

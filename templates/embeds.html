@@ -1,0 +1,549 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Sangeet Player</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="/css/embeded">
+</head>
+
+<body>
+    <div class="player-container">
+        <div class="beat-container" id="beatContainer"></div>
+        <div class="player-content">
+            <div class="skeleton skeleton-thumbnail" id="thumbnailSkeleton"></div>
+            <img class="thumbnail" id="thumbnailImg" alt="Thumbnail" style="display: none;">
+            <div class="info">
+                <div class="skeleton skeleton-text title" id="titleSkeleton"></div>
+                <h2 class="title" id="songTitle" style="display: none;">Loading...</h2>
+                <div class="skeleton skeleton-text artist" id="artistSkeleton"></div>
+                <p class="artist" id="artistName" style="display: none;">Unknown Artist</p>
+                <div class="progress-container" id="progressContainer">
+                    <div class="skeleton skeleton-progress" id="progressSkeleton"></div>
+                    <div class="progress-bar" id="progressBar" style="display: none;"></div>
+                    <div class="progress-handle" id="progressHandle" style="display: none;"></div>
+                </div>
+                <div class="duration-container">
+                    <span id="currentTime">0:00</span>
+                    <span id="totalDuration">0:00</span>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="playPauseBtn" class="material-icons" disabled>play_arrow</button>
+            </div>
+            <div class="logo">Sangeet</div>
+        </div>
+    </div>
+
+    <script>
+      
+        
+
+
+
+
+      const beatContainer = document.getElementById("beatContainer");
+let beatBars = [];
+function formatTime(_0xc95264) {
+  const _0x3102af = Math.floor(_0xc95264 / 60);
+  const _0x2b641f = Math.floor(_0xc95264 % 60);
+  return _0x3102af + ':' + _0x2b641f.toString().padStart(2, '0');
+}
+function createBeatBars() {
+  beatContainer.innerHTML = '';
+  beatBars = [];
+  for (let _0x330cf6 = 0; _0x330cf6 < 64; _0x330cf6++) {
+    const _0x1e2d2f = document.createElement("div");
+    _0x1e2d2f.className = "beat-bar";
+    _0x1e2d2f.style.left = _0x330cf6 / 64 * 100 + '%';
+    beatContainer.appendChild(_0x1e2d2f);
+    beatBars.push(_0x1e2d2f);
+  }
+}
+        async function setupAudio() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('id') || '{{hj}}';
+            if (!videoId) {
+                showError('No video ID provided');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/v3/${videoId}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+
+                audioElement.src = data.audio_url;
+
+                songTitle.textContent = data.title;
+                artistName.textContent = data.artist;
+                thumbnailImg.src = data.thumbnail;
+                audioElement.addEventListener('loadedmetadata', () => {
+                    totalDurationElement.textContent = formatTime(audioElement.duration);
+                });
+
+                document.getElementById('thumbnailSkeleton').style.display = 'none';
+                document.getElementById('titleSkeleton').style.display = 'none';
+                document.getElementById('artistSkeleton').style.display = 'none';
+                document.getElementById('progressSkeleton').style.display = 'none';
+
+                thumbnailImg.style.display = 'block';
+                songTitle.style.display = 'block';
+                artistName.style.display = 'block';
+                progressBar.style.display = 'block';
+                progressHandle.style.display = 'block';
+
+                playPauseBtn.disabled = false;
+
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaElementSource(audioElement);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                analyser.fftSize = 128;
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+
+                startAnimations();
+            } catch (error) {
+                console.error('Error setting up audio:', error);
+                showError('Error loading audio. Please try again.');
+            }
+        }
+
+        function showError(_0x3ec5ce) {
+  songTitle.textContent = "Error";
+  artistName.textContent = _0x3ec5ce;
+  document.getElementById("thumbnailSkeleton").style.display = "none";
+  document.getElementById("titleSkeleton").style.display = "none";
+  document.getElementById("artistSkeleton").style.display = "none";
+  document.getElementById("progressSkeleton").style.display = "none";
+  songTitle.style.display = "block";
+  artistName.style.display = "block";
+}
+function playAudio() {
+  audioElement.play();
+  playPauseBtn.textContent = "pause";
+  isPlaying = true;
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+}
+function pauseAudio() {
+  audioElement.pause();
+  playPauseBtn.textContent = "play_arrow";
+  isPlaying = false;
+}
+function togglePlayPause() {
+  if (isPlaying) {
+    pauseAudio();
+  } else {
+    playAudio();
+  }
+}
+function updateProgressBar() {
+  const _0x55840d = audioElement.duration;
+  const _0x3a2534 = audioElement.currentTime;
+  const _0x146b8c = _0x3a2534 / _0x55840d * 100;
+  progressBar.style.width = _0x146b8c + '%';
+  progressHandle.style.left = _0x146b8c + '%';
+  currentTimeElement.textContent = formatTime(_0x3a2534);
+}
+function seekAudio(_0x224d2a) {
+  const _0xbc794b = progressContainer.getBoundingClientRect();
+  const _0x281ccf = (_0x224d2a.clientX - _0xbc794b.left) / _0xbc794b.width;
+  const _0x48e414 = _0x281ccf * audioElement.duration;
+  audioElement.currentTime = _0x48e414;
+}
+function animateBeatBars() {
+  requestAnimationFrame(animateBeatBars);
+  if (!isPlaying) {
+    beatBars.forEach(_0x4a90f3 => {
+      _0x4a90f3.style.height = '0';
+      _0x4a90f3.style.backgroundColor = "#1db954";
+    });
+    thumbnailImg.style.transform = "scale(1)";
+    thumbnailImg.style.boxShadow = "none";
+    return;
+  }
+  analyser.getByteFrequencyData(dataArray);
+  let _0x1e70ce = 0;
+  for (let _0x5e22e2 = 0; _0x5e22e2 < 5; _0x5e22e2++) {
+    _0x1e70ce += dataArray[_0x5e22e2];
+  }
+  _0x1e70ce /= 5;
+  _0x1e70ce = lastBassValue * 0.6 + _0x1e70ce * 0.4;
+  lastBassValue = _0x1e70ce;
+  const _0x20faeb = 1 + _0x1e70ce / 255 * 0.3;
+  const _0x4dd131 = Math.floor(_0x1e70ce / 255 * 30);
+  thumbnailImg.style.transform = "scale(" + _0x20faeb + ')';
+  thumbnailImg.style.boxShadow = "0 0 " + _0x4dd131 + "px #1db954";
+  beatBars.forEach((_0x2ce377, _0x2b2a6a) => {
+    const _0x5a0abf = dataArray[_0x2b2a6a];
+    const _0x127eec = _0x5a0abf / 255;
+    const _0x3af2d0 = _0x127eec * 100;
+    const _0x392191 = 120 + _0x2b2a6a / beatBars.length * 240;
+    _0x2ce377.style.height = _0x3af2d0 + '%';
+    _0x2ce377.style.backgroundColor = "hsl(" + _0x392191 + ", 100%, 50%)";
+  });
+}
+progressContainer.addEventListener("click", seekAudio);
+progressHandle.addEventListener("mousedown", () => {
+  audioElement.removeEventListener("timeupdate", updateProgressBar);
+  document.addEventListener("mousemove", seekAudio);
+  document.addEventListener("mouseup", () => {
+    document.removeEventListener("mousemove", seekAudio);
+    audioElement.addEventListener("timeupdate", updateProgressBar);
+  });
+});
+playPauseBtn.addEventListener("click", togglePlayPause);
+audioElement.addEventListener("timeupdate", updateProgressBar);
+audioElement.addEventListener("ended", () => {
+  pauseAudio();
+  audioElement.currentTime = 0;
+});
+function adjustPlayerSize() {
+  const _0x4fc1ce = document.querySelector(".player-container");
+  const _0x571600 = window.innerWidth;
+  const _0x16fcee = window.innerHeight;
+  _0x4fc1ce.style.fontSize = Math.min(_0x571600 / 30, _0x16fcee / 5) + 'px';
+}
+window.addEventListener("resize", () => {
+  adjustPlayerSize();
+  createBeatBars();
+});
+function startAnimations() {
+  createBeatBars();
+  animateBeatBars();
+}
+adjustPlayerSize();
+setupAudio();
+    </script>
+</body>
+
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Sangeet Player</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: transparent;
+        }
+
+        .player-container {
+            display: flex;
+            align-items: center;
+            background-color: #282828;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        .beat-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .beat-bar {
+            position: absolute;
+            bottom: 0;
+            width: 2px;
+            background-color: #1db954;
+            transition: height 0.1s ease, background 0.1s ease;
+        }
+
+        .player-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            margin-right: 16px;
+            object-fit: cover;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .info {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0 0 4px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .artist {
+            color: #b3b3b3;
+            font-size: 14px;
+            font-weight: 300;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-left: 16px;
+        }
+
+        #playPauseBtn {
+            background-color: #1db954;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        #playPauseBtn:hover {
+            background-color: #1ed760;
+            transform: scale(1.05);
+        }
+
+        #playPauseBtn:disabled {
+            background-color: #535353;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #404040;
+            border-radius: 5px;
+            margin-top: 12px;
+            height: 4px;
+            position: relative;
+            cursor: pointer;
+            overflow: visible;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background-color: #1db954;
+            border-radius: 5px;
+            width: 0;
+        }
+
+        .progress-handle {
+            width: 12px;
+            height: 12px;
+            background-color: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .duration-container {
+            display: flex;
+            justify-content: space-between;
+            color: #b3b3b3;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .logo {
+            font-size: 8px;
+            color: #1db954;
+            font-weight: bold;
+            margin-left: 16px;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 2px;
+        }
+
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background-color: #3a3a3a;
+        }
+
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(90deg,
+                    rgba(255, 255, 255, 0) 0,
+                    rgba(255, 255, 255, 0.05) 20%,
+                    rgba(255, 255, 255, 0.1) 60%,
+                    rgba(255, 255, 255, 0));
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .skeleton-thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+        }
+
+        .skeleton-text {
+            height: 1em;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .skeleton-text.title {
+            width: 70%;
+        }
+
+        .skeleton-text.artist {
+            width: 50%;
+        }
+
+        .skeleton-progress {
+            height: 4px;
+            border-radius: 5px;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="player-container">
+        <div class="beat-container" id="beatContainer"></div>
+        <div class="player-content">
+            <div class="skeleton skeleton-thumbnail" id="thumbnailSkeleton"></div>
+            <img class="thumbnail" id="thumbnailImg" alt="Thumbnail" style="display: none;">
+            <div class="info">
+                <div class="skeleton skeleton-text title" id="titleSkeleton"></div>
+                <h2 class="title" id="songTitle" style="display: none;">Loading...</h2>
+                <div class="skeleton skeleton-text artist" id="artistSkeleton"></div>
+                <p class="artist" id="artistName" style="display: none;">Unknown Artist</p>
+                <div class="progress-container" id="progressContainer">
+                    <div class="skeleton skeleton-progress" id="progressSkeleton"></div>
+                    <div class="progress-bar" id="progressBar" style="display: none;"></div>
+                    <div class="progress-handle" id="progressHandle" style="display: none;"></div>
+                </div>
+                <div class="duration-container">
+                    <span id="currentTime">0:00</span>
+                    <span id="totalDuration">0:00</span>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="playPauseBtn" class="material-icons" disabled>play_arrow</button>
+            </div>
+            <div class="logo">Sangeet</div>
+        </div>
+    </div>
+
+    <script>
+        const _0x39bb60=_0x4472;(function(_0x4849c2,_0x106623){const _0xbb11c7=_0x4472,_0x2ba78e=_0x4849c2();while(!![]){try{const _0x39b7f9=-parseInt(_0xbb11c7(0x164))/(0x95c+-0x1*0x967+-0x4*-0x3)+parseInt(_0xbb11c7(0x13a))/(0x1e1+0x1eba+-0x2099)*(-parseInt(_0xbb11c7(0x14a))/(-0x95+0xd*0xf5+0x9*-0x151))+-parseInt(_0xbb11c7(0x13e))/(0x1*0x8c3+-0x1*0x21bc+0x18fd)*(-parseInt(_0xbb11c7(0x142))/(-0x38d*-0x5+0x1200*0x2+-0x35bc))+-parseInt(_0xbb11c7(0x155))/(-0x1*0x19b2+0x203+0x17b5)+parseInt(_0xbb11c7(0x141))/(-0x138+0xa3*-0x2+0xd7*0x3)+-parseInt(_0xbb11c7(0x15a))/(-0x1*0x911+0x3*-0xbe+-0xdf*-0xd)+parseInt(_0xbb11c7(0x14b))/(-0xc03+0x3f8+-0x814*-0x1)*(parseInt(_0xbb11c7(0x161))/(0x22fe+0x1*0x755+-0x19*0x1b1));if(_0x39b7f9===_0x106623)break;else _0x2ba78e['push'](_0x2ba78e['shift']());}catch(_0x293b42){_0x2ba78e['push'](_0x2ba78e['shift']());}}}(_0x5912,0x3*0x212ab+-0x3cda6+0x1c75a));const audioElement=new Audio();function _0x5912(){const _0x1366be=['719448Gxcwna','totalDurat','progressHa','style','push','1995832WBnfxc','progressCo','artistName','getElement','padStart','ukAUK','div','724210OAQiMR','playPauseB','ent','435308EDJPiK','thumbnailI','ner','toString','184xDMjQf','ndle','floor','ion','904396FJHpAn','innerHTML','iFBkf','907816aUsGel','5bKvZkM','beatContai','progressBa','YoEmO','VvOnC','currentTim','songTitle','className','16545Sxjaff','153qpWIHB','left','ntainer','udaFl','dZUeE','zvvum','beat-bar','createElem','appendChil','ById'];_0x5912=function(){return _0x1366be;};return _0x5912();}let isPlaying=![];const playPauseBtn=document[_0x39bb60(0x15d)+_0x39bb60(0x154)](_0x39bb60(0x162)+'tn'),progressBar=document[_0x39bb60(0x15d)+_0x39bb60(0x154)](_0x39bb60(0x144)+'r'),progressHandle=document[_0x39bb60(0x15d)+_0x39bb60(0x154)](_0x39bb60(0x157)+_0x39bb60(0x13b)),progressContainer=document[_0x39bb60(0x15d)+_0x39bb60(0x154)](_0x39bb60(0x15b)+_0x39bb60(0x14d)),thumbnailImg=document[_0x39bb60(0x15d)+_0x39bb60(0x154)](_0x39bb60(0x165)+'mg'),songTitle=document[_0x39bb60(0x15d)+_0x39bb60(0x154)](_0x39bb60(0x148)),artistName=document[_0x39bb60(0x15d)+_0x39bb60(0x154)](_0x39bb60(0x15c)),currentTimeElement=document[_0x39bb60(0x15d)+_0x39bb60(0x154)](_0x39bb60(0x147)+'e'),totalDurationElement=document[_0x39bb60(0x15d)+_0x39bb60(0x154)](_0x39bb60(0x156)+_0x39bb60(0x13d)),beatContainer=document[_0x39bb60(0x15d)+_0x39bb60(0x154)](_0x39bb60(0x143)+_0x39bb60(0x166));function _0x4472(_0x141236,_0x139711){const _0x3d90c8=_0x5912();return _0x4472=function(_0x35544f,_0x365702){_0x35544f=_0x35544f-(0x2*-0x79d+0x23de+0x2*-0x9b5);let _0x2bc709=_0x3d90c8[_0x35544f];return _0x2bc709;},_0x4472(_0x141236,_0x139711);}let beatBars=[],audioContext,analyser,dataArray,lastBassValue=-0x1451+-0x9ae+0x7*0x449;function formatTime(_0xc95264){const _0xf8a25f=_0x39bb60,_0x2ae081={'zvvum':function(_0x3a5e77,_0x4dd038){return _0x3a5e77/_0x4dd038;},'dZUeE':function(_0x1ef13f,_0x4904d6){return _0x1ef13f%_0x4904d6;}},_0x3102af=Math[_0xf8a25f(0x13c)](_0x2ae081[_0xf8a25f(0x150)](_0xc95264,0x36d*0xa+0x1*-0xe21+-0x13e5)),_0x2b641f=Math[_0xf8a25f(0x13c)](_0x2ae081[_0xf8a25f(0x14f)](_0xc95264,-0x6*-0x1e8+0xc*0x26a+-0x6*0x6b2));return _0x3102af+':'+_0x2b641f[_0xf8a25f(0x167)]()[_0xf8a25f(0x15e)](-0x1*0x25a5+-0x2541+0x88*0x8d,'0');}function createBeatBars(){const _0xb9522a=_0x39bb60,_0x1461f4={'iFBkf':function(_0x127461,_0x740b5){return _0x127461<_0x740b5;},'YoEmO':_0xb9522a(0x160),'udaFl':_0xb9522a(0x151),'VvOnC':function(_0x16dc84,_0x9f30f5){return _0x16dc84*_0x9f30f5;},'ukAUK':function(_0x33f2bb,_0x2072bd){return _0x33f2bb/_0x2072bd;}},_0x1e08a8=-0x15a3+0x992*-0x2+-0x9*-0x48f;beatContainer[_0xb9522a(0x13f)]='',beatBars=[];for(let _0x330cf6=-0x107+-0x2c7*-0xd+-0x1c1*0x14;_0x1461f4[_0xb9522a(0x140)](_0x330cf6,_0x1e08a8);_0x330cf6++){const _0x1e2d2f=document[_0xb9522a(0x152)+_0xb9522a(0x163)](_0x1461f4[_0xb9522a(0x145)]);_0x1e2d2f[_0xb9522a(0x149)]=_0x1461f4[_0xb9522a(0x14e)],_0x1e2d2f[_0xb9522a(0x158)][_0xb9522a(0x14c)]=_0x1461f4[_0xb9522a(0x146)](_0x1461f4[_0xb9522a(0x15f)](_0x330cf6,_0x1e08a8),0x283*-0xe+-0x1*0xd09+0x3097)+'%',beatContainer[_0xb9522a(0x153)+'d'](_0x1e2d2f),beatBars[_0xb9522a(0x159)](_0x1e2d2f);}}
+        async function setupAudio() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('id') || '{{hj}}';
+            if (!videoId) {
+                showError('No video ID provided');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/v3/${videoId}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+
+                audioElement.src = data.audio_url;
+
+                songTitle.textContent = data.title;
+                artistName.textContent = data.artist;
+                thumbnailImg.src = data.thumbnail;
+                audioElement.addEventListener('loadedmetadata', () => {
+                    totalDurationElement.textContent = formatTime(audioElement.duration);
+                });
+
+                document.getElementById('thumbnailSkeleton').style.display = 'none';
+                document.getElementById('titleSkeleton').style.display = 'none';
+                document.getElementById('artistSkeleton').style.display = 'none';
+                document.getElementById('progressSkeleton').style.display = 'none';
+
+                thumbnailImg.style.display = 'block';
+                songTitle.style.display = 'block';
+                artistName.style.display = 'block';
+                progressBar.style.display = 'block';
+                progressHandle.style.display = 'block';
+
+                playPauseBtn.disabled = false;
+
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaElementSource(audioElement);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                analyser.fftSize = 128;
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+
+                startAnimations();
+            } catch (error) {
+                console.error('Error setting up audio:', error);
+                showError('Error loading audio. Please try again.');
+            }
+        }
+
+      function _0x38ef(_0xbc68eb,_0x26574d){const _0x355416=_0x46fa();return _0x38ef=function(_0x452182,_0x516c48){_0x452182=_0x452182-(0x2177+-0x1eef*0x1+-0x1a1);let _0x1d4a71=_0x355416[_0x452182];return _0x1d4a71;},_0x38ef(_0xbc68eb,_0x26574d);}const _0x241d59=_0x38ef;(function(_0x4b2e5d,_0x456832){const _0x2c7879=_0x38ef,_0x245bc8=_0x4b2e5d();while(!![]){try{const _0x41bc2e=parseInt(_0x2c7879(0x11a))/(-0x22c0+0x1416+0xeab)+parseInt(_0x2c7879(0x14a))/(-0x237+0x1b07*0x1+-0x1*0x18ce)*(-parseInt(_0x2c7879(0x139))/(0x1*-0x36f+0x1345*-0x1+0x16b7))+parseInt(_0x2c7879(0x119))/(-0x2*-0x165+0x1*-0x1161+0xe9b)*(-parseInt(_0x2c7879(0x122))/(-0x878+0x1df9+0xdc*-0x19))+-parseInt(_0x2c7879(0x105))/(0x206c+0x8c3+-0x2929)+parseInt(_0x2c7879(0x123))/(0x1f2f+-0x1692+-0x896)*(parseInt(_0x2c7879(0x151))/(-0x21b2+-0x404*0x8+-0x20ed*-0x2))+-parseInt(_0x2c7879(0x112))/(0x1e94+-0x764+-0x1727)+parseInt(_0x2c7879(0x109))/(0xd*0x8d+-0x14*-0x184+0x25*-0x103);if(_0x41bc2e===_0x456832)break;else _0x245bc8['push'](_0x245bc8['shift']());}catch(_0x55a72d){_0x245bc8['push'](_0x245bc8['shift']());}}}(_0x46fa,0xdc1b9+0x7*-0x1d42b+0x5f3f1*0x1));function showError(_0x3ec5ce){const _0x59e002=_0x38ef,_0x2ef7a1={'oCAfb':_0x59e002(0x118)+_0x59e002(0x114),'ZyAiy':_0x59e002(0xe8),'NDrhx':_0x59e002(0x115)+_0x59e002(0x15c),'KBkmF':_0x59e002(0x143),'nMAtS':_0x59e002(0x110)+_0x59e002(0xfc),'YZipd':_0x59e002(0xe7)+_0x59e002(0xea),'njOeR':_0x59e002(0xf6)+_0x59e002(0x133),'exRHG':_0x59e002(0xef)},_0x296769=_0x2ef7a1[_0x59e002(0xfe)][_0x59e002(0x154)]('|');let _0x23cdf1=0x3*-0x9e3+0xb05+0x1*0x12a4;while(!![]){switch(_0x296769[_0x23cdf1++]){case'0':songTitle[_0x59e002(0x120)][_0x59e002(0x138)]=_0x2ef7a1[_0x59e002(0x121)];continue;case'1':document[_0x59e002(0x149)+_0x59e002(0x13a)](_0x2ef7a1[_0x59e002(0xe9)])[_0x59e002(0x120)][_0x59e002(0x138)]=_0x2ef7a1[_0x59e002(0x144)];continue;case'2':document[_0x59e002(0x149)+_0x59e002(0x13a)](_0x2ef7a1[_0x59e002(0x101)])[_0x59e002(0x120)][_0x59e002(0x138)]=_0x2ef7a1[_0x59e002(0x144)];continue;case'3':document[_0x59e002(0x149)+_0x59e002(0x13a)](_0x2ef7a1[_0x59e002(0xff)])[_0x59e002(0x120)][_0x59e002(0x138)]=_0x2ef7a1[_0x59e002(0x144)];continue;case'4':artistName[_0x59e002(0xf7)+'t']=_0x3ec5ce;continue;case'5':artistName[_0x59e002(0x120)][_0x59e002(0x138)]=_0x2ef7a1[_0x59e002(0x121)];continue;case'6':document[_0x59e002(0x149)+_0x59e002(0x13a)](_0x2ef7a1[_0x59e002(0x156)])[_0x59e002(0x120)][_0x59e002(0x138)]=_0x2ef7a1[_0x59e002(0x144)];continue;case'7':songTitle[_0x59e002(0xf7)+'t']=_0x2ef7a1[_0x59e002(0x140)];continue;}break;}}function playAudio(){const _0x2131cb=_0x38ef,_0x10ea95={'lbhjr':_0x2131cb(0xf3),'wNpjQ':function(_0x286438,_0x3b38ea){return _0x286438===_0x3b38ea;},'TjnQM':_0x2131cb(0x13e)};audioElement[_0x2131cb(0x106)](),playPauseBtn[_0x2131cb(0xf7)+'t']=_0x10ea95[_0x2131cb(0x12c)],isPlaying=!![],_0x10ea95[_0x2131cb(0x130)](audioContext[_0x2131cb(0xfa)],_0x10ea95[_0x2131cb(0x11c)])&&audioContext[_0x2131cb(0x10b)]();}function pauseAudio(){const _0xf7eed1=_0x38ef,_0x413f28={'OlRoX':_0xf7eed1(0x116)};audioElement[_0xf7eed1(0xf3)](),playPauseBtn[_0xf7eed1(0xf7)+'t']=_0x413f28[_0xf7eed1(0x14e)],isPlaying=![];}function togglePlayPause(){const _0x557cc9=_0x38ef,_0x43db9d={'FpuWI':function(_0x358d87){return _0x358d87();},'IJcHo':function(_0x19e39f){return _0x19e39f();}};isPlaying?_0x43db9d[_0x557cc9(0xf1)](pauseAudio):_0x43db9d[_0x557cc9(0xf9)](playAudio);}function updateProgressBar(){const _0x53473b=_0x38ef,_0xf9a6fe={'zbeOk':function(_0x1e8db3,_0x20d821){return _0x1e8db3*_0x20d821;},'bHbLq':function(_0x20ee40,_0x583ef0){return _0x20ee40/_0x583ef0;},'IDlbG':function(_0x291c9a,_0x577910){return _0x291c9a(_0x577910);}},_0x55840d=audioElement[_0x53473b(0x104)],_0x3a2534=audioElement[_0x53473b(0x103)+'e'],_0x146b8c=_0xf9a6fe[_0x53473b(0xf4)](_0xf9a6fe[_0x53473b(0x15a)](_0x3a2534,_0x55840d),0x7cf+-0x12fd+0xb92);progressBar[_0x53473b(0x120)][_0x53473b(0x11e)]=_0x146b8c+'%',progressHandle[_0x53473b(0x120)][_0x53473b(0x141)]=_0x146b8c+'%',currentTimeElement[_0x53473b(0xf7)+'t']=_0xf9a6fe[_0x53473b(0x10f)](formatTime,_0x3a2534);}function seekAudio(_0x224d2a){const _0x28c5c4=_0x38ef,_0x3c0ca4={'qnEuA':function(_0x5b9e6e,_0x14c444){return _0x5b9e6e/_0x14c444;},'SnFje':function(_0x17ae5a,_0x325f4d){return _0x17ae5a-_0x325f4d;},'Wltxn':function(_0x277664,_0x249ad6){return _0x277664*_0x249ad6;}},_0xbc794b=progressContainer[_0x28c5c4(0x125)+_0x28c5c4(0xf5)+'t'](),_0x281ccf=_0x3c0ca4[_0x28c5c4(0x147)](_0x3c0ca4[_0x28c5c4(0x111)](_0x224d2a[_0x28c5c4(0x10d)],_0xbc794b[_0x28c5c4(0x141)]),_0xbc794b[_0x28c5c4(0x11e)]),_0x48e414=_0x3c0ca4[_0x28c5c4(0x128)](_0x281ccf,audioElement[_0x28c5c4(0x104)]);audioElement[_0x28c5c4(0x103)+'e']=_0x48e414;}function animateBeatBars(){const _0x45835b=_0x38ef,_0xdcca07={'VVCLI':_0x45835b(0x11f),'LybXD':function(_0x30fdd2,_0x305038){return _0x30fdd2/_0x305038;},'uctTJ':function(_0x9b498c,_0x111ead){return _0x9b498c*_0x111ead;},'VtDEt':function(_0xb3009d,_0x371cba){return _0xb3009d+_0x371cba;},'gsWDe':function(_0x201e07,_0x39951a){return _0x201e07/_0x39951a;},'OXYrG':function(_0x5b1542,_0x265b44){return _0x5b1542(_0x265b44);},'wcRQw':_0x45835b(0x145),'kBrEt':_0x45835b(0x143),'oIrVc':function(_0x1495ff,_0x26bc7a){return _0x1495ff<_0x26bc7a;},'kYcOj':function(_0x3bd91d,_0x133f1c){return _0x3bd91d*_0x133f1c;},'QgEQw':function(_0x5988eb,_0x227000){return _0x5988eb*_0x227000;},'wYyHb':function(_0x42b701,_0x386f39){return _0x42b701/_0x386f39;}};_0xdcca07[_0x45835b(0x132)](requestAnimationFrame,animateBeatBars);if(!isPlaying){beatBars[_0x45835b(0x152)](_0x4a90f3=>{const _0x326a3=_0x45835b;_0x4a90f3[_0x326a3(0x120)][_0x326a3(0x113)]='0',_0x4a90f3[_0x326a3(0x120)][_0x326a3(0x10a)+_0x326a3(0x14d)]=_0xdcca07[_0x326a3(0x100)];}),thumbnailImg[_0x45835b(0x120)][_0x45835b(0xf2)]=_0xdcca07[_0x45835b(0x14f)],thumbnailImg[_0x45835b(0x120)][_0x45835b(0xfb)]=_0xdcca07[_0x45835b(0x102)];return;}analyser[_0x45835b(0xeb)+_0x45835b(0x155)](dataArray);let _0x1e70ce=-0x535+-0x22ff+-0x1*-0x2834;for(let _0x5e22e2=-0x216f+0x11c6+-0x1*-0xfa9;_0xdcca07[_0x45835b(0x13d)](_0x5e22e2,-0x1948+0x441*-0x5+-0x2*-0x1749);_0x5e22e2++){_0x1e70ce+=dataArray[_0x5e22e2];}_0x1e70ce/=-0x5cf+-0x170*0x2+0x8b4,_0x1e70ce=_0xdcca07[_0x45835b(0x13f)](_0xdcca07[_0x45835b(0x157)](lastBassValue,0x256c+0x2661+-0x4bcd+0.6),_0xdcca07[_0x45835b(0x157)](_0x1e70ce,0x19*-0x167+0x26d5+-0x1e3*0x2+0.4)),lastBassValue=_0x1e70ce;const _0x20faeb=_0xdcca07[_0x45835b(0x13f)](0x1336+0x25a*0x5+-0x1ef7*0x1,_0xdcca07[_0x45835b(0xf0)](_0xdcca07[_0x45835b(0x12a)](_0x1e70ce,-0x23*-0x62+-0x1195+-0x1a*-0x33),0x363*0x9+0xd41+-0x2bbc+0.3)),_0x4dd131=Math[_0x45835b(0xec)](_0xdcca07[_0x45835b(0x150)](_0xdcca07[_0x45835b(0x12b)](_0x1e70ce,0xf4d+0x747+-0x1595),0x2*0x821+0x2e*0xb2+-0x3020));thumbnailImg[_0x45835b(0x120)][_0x45835b(0xf2)]=_0x45835b(0x148)+_0x20faeb+')',thumbnailImg[_0x45835b(0x120)][_0x45835b(0xfb)]=_0x45835b(0xf8)+_0x4dd131+_0x45835b(0x137),beatBars[_0x45835b(0x152)]((_0x2ce377,_0x2b2a6a)=>{const _0x5ab5ee=_0x45835b,_0x5a0abf=dataArray[_0x2b2a6a],_0x127eec=_0xdcca07[_0x5ab5ee(0x14c)](_0x5a0abf,-0x2fb+-0x1c2e*0x1+0x2028),_0x3af2d0=_0xdcca07[_0x5ab5ee(0x157)](_0x127eec,0x1ea9+-0x4e*0x4a+-0x7b9),_0x392191=_0xdcca07[_0x5ab5ee(0x13f)](-0x2*0xe59+0x13*-0x1df+0x40b7,_0xdcca07[_0x5ab5ee(0x157)](_0xdcca07[_0x5ab5ee(0x12a)](_0x2b2a6a,beatBars[_0x5ab5ee(0x12f)]),-0x6cd*-0x5+-0x12f7+-0xe1a));_0x2ce377[_0x5ab5ee(0x120)][_0x5ab5ee(0x113)]=_0x3af2d0+'%',_0x2ce377[_0x5ab5ee(0x120)][_0x5ab5ee(0x10a)+_0x5ab5ee(0x14d)]=_0x5ab5ee(0x142)+_0x392191+(_0x5ab5ee(0xfd)+'%)');});}progressContainer[_0x241d59(0x15b)+_0x241d59(0x108)](_0x241d59(0x13c),seekAudio),progressHandle[_0x241d59(0x15b)+_0x241d59(0x108)](_0x241d59(0x158),()=>{const _0xb165e=_0x241d59,_0x51837b={'dXVgX':_0xb165e(0x126),'HWijp':_0xb165e(0x12e),'tPwGP':_0xb165e(0xed)};audioElement[_0xb165e(0x11d)+_0xb165e(0x117)](_0x51837b[_0xb165e(0x134)],updateProgressBar),document[_0xb165e(0x15b)+_0xb165e(0x108)](_0x51837b[_0xb165e(0x146)],seekAudio),document[_0xb165e(0x15b)+_0xb165e(0x108)](_0x51837b[_0xb165e(0x12d)],()=>{const _0x348794=_0xb165e;document[_0x348794(0x11d)+_0x348794(0x117)](_0x51837b[_0x348794(0x146)],seekAudio),audioElement[_0x348794(0x15b)+_0x348794(0x108)](_0x51837b[_0x348794(0x134)],updateProgressBar);});}),playPauseBtn[_0x241d59(0x15b)+_0x241d59(0x108)](_0x241d59(0x13c),togglePlayPause),audioElement[_0x241d59(0x15b)+_0x241d59(0x108)](_0x241d59(0x12e),updateProgressBar),audioElement[_0x241d59(0x15b)+_0x241d59(0x108)](_0x241d59(0x13b),()=>{const _0x5f2578=_0x241d59,_0x19d40d={'LuOUB':function(_0x56b417){return _0x56b417();}};_0x19d40d[_0x5f2578(0x129)](pauseAudio),audioElement[_0x5f2578(0x103)+'e']=0xc55+-0xe7c+-0x1d*-0x13;});function adjustPlayerSize(){const _0xde1ed2=_0x241d59,_0x129511={'qgVrn':_0xde1ed2(0x15d)+_0xde1ed2(0x131),'qhBvk':function(_0x2cc901,_0x183d42){return _0x2cc901/_0x183d42;}},_0x4fc1ce=document[_0xde1ed2(0x11b)+_0xde1ed2(0x127)](_0x129511[_0xde1ed2(0x153)]),_0x571600=window[_0xde1ed2(0x135)],_0x16fcee=window[_0xde1ed2(0x14b)+'t'];_0x4fc1ce[_0xde1ed2(0x120)][_0xde1ed2(0x136)]=Math[_0xde1ed2(0x159)](_0x129511[_0xde1ed2(0x107)](_0x571600,0x368*-0xb+0x1d22+0x874),_0x129511[_0xde1ed2(0x107)](_0x16fcee,0x17a5+0x1eb0+-0x58*0x9e))+'px';}window[_0x241d59(0x15b)+_0x241d59(0x108)](_0x241d59(0x10c),()=>{const _0x504077=_0x241d59,_0x5249e3={'raZTg':function(_0x8f0045){return _0x8f0045();},'GvGqg':function(_0x1cda1f){return _0x1cda1f();}};_0x5249e3[_0x504077(0xee)](adjustPlayerSize),_0x5249e3[_0x504077(0x10e)](createBeatBars);});function startAnimations(){const _0x4ddf85=_0x241d59,_0x2f0fa9={'fWckS':function(_0x427326){return _0x427326();}};_0x2f0fa9[_0x4ddf85(0x124)](createBeatBars),_0x2f0fa9[_0x4ddf85(0x124)](animateBeatBars);}function _0x46fa(){const _0x191345=['6896sTnzen','innerHeigh','LybXD','Color','OlRoX','wcRQw','QgEQw','8tCwRuz','forEach','qgVrn','split','quencyData','njOeR','uctTJ','mousedown','min','bHbLq','addEventLi','ton','.player-co','progressSk','block','NDrhx','eleton','getByteFre','floor','mouseup','raZTg','Error','kYcOj','FpuWI','transform','pause','zbeOk','gClientRec','thumbnailS','textConten','0\x200\x20','IJcHo','state','boxShadow','eton',',\x20100%,\x2050','oCAfb','YZipd','VVCLI','nMAtS','kBrEt','currentTim','duration','4182444aGpmDd','play','qhBvk','stener','23726180ytsbGw','background','resume','resize','clientX','GvGqg','IDlbG','artistSkel','SnFje','5730381JaQPzN','height','3|0|5','titleSkele','play_arrow','tListener','7|4|6|1|2|','1476812flSAXH','802975EhMJUU','querySelec','TjnQM','removeEven','width','#1db954','style','ZyAiy','10omgSGl','1551711urPsrK','fWckS','getBoundin','mousemove','tor','Wltxn','LuOUB','gsWDe','wYyHb','lbhjr','tPwGP','timeupdate','length','wNpjQ','ntainer','OXYrG','keleton','HWijp','innerWidth','fontSize','px\x20#1db954','display','759EhDmNf','ById','ended','click','oIrVc','suspended','VtDEt','exRHG','left','hsl(','none','KBkmF','scale(1)','dXVgX','qnEuA','scale(','getElement'];_0x46fa=function(){return _0x191345;};return _0x46fa();}adjustPlayerSize(),setupAudio();
+    </script>
+</body>
+
+</html>

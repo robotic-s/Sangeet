@@ -1,0 +1,14 @@
+Flask
+mutagen
+yt-dlp
+pytube
+spotipy
+fuzzywuzzy
+Pillow
+requests
+syncedlyrics
+ytmusicapi
+python-Levenshtein
+python-dotenv
+pycryptodome
+cryptography

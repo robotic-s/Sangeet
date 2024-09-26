@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sangeet Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Monoton&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --text-color: #fff;
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --accent-color: #ffe66d;
+            --card-color: #2c2c54;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, var(--secondary-color) 0%, var(--bg-color) 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+            transition: background 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-family: 'Monoton', cursive;
+            color: var(--accent-color);
+            text-align: center;
+            font-size: 4em;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-box {
+            display: flex;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #search-input {
+            flex-grow: 1;
+            padding: 20px 30px;
+            font-size: 20px;
+            border: none;
+            outline: none;
+            background-color: var(--card-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        #search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        #search-button {
+            padding: 20px 40px;
+            font-size: 20px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #search-button:hover {
+            background-color: #ff8f8f;
+            transform: scale(1.05);
+        }
+
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .result-item {
+            background-color: var(--card-color);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .result-item:hover::before {
+            opacity: 0.8;
+        }
+
+        .result-item * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .result-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .result-item h3 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--text-color);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .result-item:hover h3 {
+            color: #fff;
+        }
+
+        .result-item p {
+            margin: 15px 0 0;
+            font-size: 18px;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        .result-item:hover p {
+            color: #fff;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 28px;
+            color: var(--text-color);
+            margin-top: 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 15px;
+            vertical-align: middle;
+        }
+
+        .download-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .result-item:hover .download-icon {
+            opacity: 1;
+        }
+
+        .preparing-download {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .result-item.downloading .preparing-download {
+            opacity: 1;
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-color: #f0f0f0;
+                --text-color: #333;
+                --primary-color: #ff6b6b;
+                --secondary-color: #4ecdc4;
+                --accent-color: #ffe66d;
+                --card-color: #fff;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Sangeet Search</h1>
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Search for songs...">
+            <button id="search-button">Search</button>
+        </div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        document.getElementById('search-button').addEventListener('click', performSearch);
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        function performSearch() {
+            const searchTerm = document.getElementById('search-input').value;
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '<div class="loading">Searching for songs...</div>';
+
+            fetch('/dsearch_youtube', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ search_term: searchTerm }),
+            })
+            .then(response => response.json())
+            .then(data => displayResults(data))
+            .catch(error => {
+                console.error('Error:', error);
+                resultsContainer.innerHTML = '<p>An error occurred while searching. Please try again.</p>';
+            });
+        }
+
+        function displayResults(results) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<p>No results found. Please try a different search term.</p>';
+                return;
+            }
+
+            results.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <img src="${result.thumbnail}" alt="${result.title}" loading="lazy">
+                    <h3>${result.title}</h3>
+                    <p>${result.author}</p>
+                    <i class="fas fa-download download-icon"></i>
+                    <div class="preparing-download">Preparing Download...</div>
+                `;
+                resultItem.addEventListener('click', () => {
+                    resultItem.classList.add('downloading');
+                    downloadSong(result.id, result.title, () => {
+                        resultItem.classList.remove('downloading');
+                    });
+                });
+                resultsContainer.appendChild(resultItem);
+            });
+        }
+
+        function downloadSong(videoId, title, callback) {
+            fetch(`/ddownload/${videoId}`)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${title}.flac`;
+                    a.click();
+                    callback();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while downloading the song. Please try again.');
+                    callback();
+                });
+        }
+    </script>
+</body>
+</html>
