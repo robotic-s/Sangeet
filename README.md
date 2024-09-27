@@ -136,6 +136,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Sangeet is a personal project and should not be used as a distributor for music or to charge others for music. Please use Sangeet responsibly and respect all applicable copyright laws and regulations.
 
+DISCLAIMER:
+This project (Sangeet) is for educational and personal use only. It is not intended for commercial use or for violating YouTube's terms of service or any copyright laws. The creator of this project is not responsible for any misuse of this code. By using this code, you agree to use it at your own risk and in compliance with all applicable laws and terms of service. DO NOT use this code to download copyrighted content without permission.
 ## Acknowledgements
 
 - YouTube for providing the vast library of music
