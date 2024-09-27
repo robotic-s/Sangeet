@@ -54,6 +54,8 @@ Sangeet is a feature-rich music platform that brings a personalized and immersiv
 
 6. Access Sangeet in your web browser at `http://localhost:80`
 
+7. Make sure you have ffmpeg installed..
+
 ## Usage
 
 - Register for an account or log in if you already have one.
