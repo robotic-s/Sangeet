@@ -34,7 +34,7 @@ Sangeet is a feature-rich music platform that brings a personalized and immersiv
 1. Clone the repository:
    ```
    git clone https://github.com/robotic-s/Sangeet.git
-   cd sangeet
+   cd Sangeet
    ```
 
 2. Install dependencies:
