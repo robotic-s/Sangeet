@@ -117,9 +117,9 @@
             <img id="mini-player-artwork" src="/static/default_artwork.jpg" alt="Current Song Artwork">
             <div id="mini-player-info">
                 <div class="marquee-container">
-                    <div class="marquee-content">
+                    <div class="marquee-content2">
                         <span id="mini-player-title">Select a song</span>
-                        <span id="mini-player-title-repeat">Select a song</span>
+                        <span id="mini-player-title-repeat"></span>
                     </div>
                 </div>
                 <div id="mini-player-artist"></div>
@@ -140,9 +140,9 @@
         <div id="full-player-content">
             <img id="full-player-artwork" src="/static/default_artwork.jpg" alt="Current Song Artwork">
             <div class="marquee-container">
-                <div class="marquee-content">
+                <div class="marquee-content2">
                     <span id="full-player-title">Select a song</span>
-                    <span id="full-player-title-repeat">Select a song</span>
+                    <span id="full-player-title-repeat"></span>
                 </div>
             </div>
             <p id="full-player-artist"></p>
@@ -308,11 +308,11 @@
     </div>
     <div id="show-mode-panel" class="hidden">
         <img id="show-mode-artwork" src="/static/default_artwork.jpg" alt="Current Song Artwork">
-        <div id="show-mode-song-info">
-            <div id="show-mode-title-container">
-                <div id="show-mode-title">No song playing</div>
+        <div id="show-mode-song-info2">
+            <div id="show-mode-title-container2">
+                <span id="show-mode-title2">Title</span>
             </div>
-            <div id="show-mode-artist">Unknown artist</div>
+            <div id="show-mode-artist2">Artist</div>
         </div>
         <button id="close-show-mode-btn" class="control-btn">
             <span class="material-icons">close</span>
@@ -807,7 +807,7 @@
         // Add this function to update the show mode panel information
         function updateShowModeInfo() {
             const artwork = document.getElementById('show-mode-artwork');
-            const title = document.getElementById('show-mode-title');
+            const title = document.getElementById('show-mode-title2');
             const artist = document.getElementById('show-mode-artist');
 
             if (currentSong) {
@@ -1673,13 +1673,13 @@ function fetchLyrics(videoId) {
 
         function updateMarqueeContent(elementId, text) {
             const element = document.getElementById(elementId);
-            const repeatElement = document.getElementById(elementId + '-repeat');
+            const repeatElement = document.getElementById(elementId);
             element.textContent = text;
             repeatElement.textContent = text;
         }
 
         function resetMarqueeAnimation() {
-            const marqueeContents = document.querySelectorAll('.marquee-content');
+            const marqueeContents = document.querySelectorAll('.marquee-content2');
             marqueeContents.forEach(content => {
                 content.style.animation = 'none';
                 content.offsetHeight;
