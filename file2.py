@@ -166,6 +166,8 @@ def download_and_process_audio(url, lyrics_providers):
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': os.path.join(temp_dir, '%(id)s.%(ext)s'),
+        'config_location' : 'yt_dlp.conf',
+        'username' : 'oauth2',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'flac',
