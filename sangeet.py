@@ -1136,6 +1136,8 @@ def fetch_ytmusic_results(search_term):
 def fetch_ytdlp_results(search_term):
     ydl_opts = {
         'format': 'bestaudio/best',
+        'config_location' : 'yt_dlp.conf',
+        'username' : 'oauth2',
         'quiet': True,
         'no_warnings': True,
         'extract_flat': 'in_playlist',
@@ -1250,6 +1252,8 @@ def process_with_ytdlp(url):
         'format': 'bestaudio/best',
         'quiet': True,
         'no_warnings': True,
+        'config_location' : 'yt_dlp.conf',
+        'username' : 'oauth2',
         'extract_flat': 'in_playlist',
         'skip_download': True,
     }
@@ -1425,6 +1429,8 @@ def play_youtube():
             'no_warnings': True,
             'extract_flat': 'in_playlist',
             'skip_download': True,
+            'config_location' : 'yt_dlp.conf',
+            'username' : 'oauth2',
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -2161,6 +2167,8 @@ def getresults(term):
             'format': 'bestaudio/best',
             'quiet': True,
             'no_warnings': True,
+            'config_location' : 'yt_dlp.conf',
+            'username' : 'oauth2',
             'extract_flat': 'in_playlist',
             'skip_download': True,
         }
@@ -2307,6 +2315,8 @@ def get_audio_url(video_id):
         'format': 'bestaudio/best',
         'quiet': True,
         'no_warnings': True,
+        'config_location' : 'yt_dlp.conf',
+        'username' : 'oauth2',
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
@@ -2315,6 +2325,8 @@ def get_audio_url(video_id):
 def get_song_info(video_id):
     ydl_opts = {
         'quiet': True,
+        'config_location' : 'yt_dlp.conf',
+        'username' : 'oauth2',
         'no_warnings': True,
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -2470,4 +2482,4 @@ if __name__ == '__main__':
         os.mkdir("temp")
     except:
         pass
-    app.run(host="0.0.0.0", port=80)
+    app.run(host="0.0.0.0", port=os.getenv("port"))
