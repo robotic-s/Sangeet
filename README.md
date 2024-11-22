@@ -48,7 +48,7 @@ Sangeet is a feature-rich music platform that brings a personalized and immersiv
 
 4. Run the application:
    ```
-   python sangeet.py
+   python sangeetre.py
    ```
 
 6. Access Sangeet in your web browser at `http://localhost:port`
