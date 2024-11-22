@@ -11,7 +11,6 @@ Sangeet is a feature-rich music platform that brings a personalized and immersiv
 - **Dynamic Search**: Find and download songs from various sources.
 - **Lyrics Display**: View synchronized lyrics for supported songs.
 - **Audio Visualization**: Enjoy beat-synchronized visual effects while listening.
-- **Playlist Management**: Create, edit, and shuffle playlists.
 - **Listening History**: Keep track of your listening habits and view statistics.
 - **Dark Mode**: Toggle between light and dark themes for comfortable viewing.
 - **Responsive Design**: Enjoy Sangeet on various devices and screen sizes.
