@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sangeet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --primary-color: #ffd700;
+            --secondary-color: #e0e0e0;
+            --accent-color: #ff6b6b;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .dashboard-header {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-details h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .user-details p {
+            margin: 5px 0 0;
+            color: var(--secondary-color);
+        }
+
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .dashboard-section {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-section:hover {
+            transform: translateY(-5px);
+        }
+
+        h2,
+        h3 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            position: relative;
+            color: var(--primary-color);
+        }
+
+        h2::after,
+        h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        form {
+            margin-top: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: #000;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #ffc400;
+            transform: scale(1.05);
+        }
+
+        .profile-picture-section {
+            margin-bottom: 30px;
+        }
+
+        .profile-picture-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border: 4px solid var(--primary-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #currentProfilePic {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: filter 0.3s ease;
+        }
+
+        .default-avatar {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 80px;
+            color: var(--secondary-color);
+        }
+
+        .profile-picture-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-picture-container:hover .profile-picture-overlay {
+            opacity: 1;
+        }
+
+        .profile-picture-container:hover #currentProfilePic {
+            filter: blur(2px);
+        }
+
+        .profile-picture-button {
+            background-color: transparent;
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 10px 16px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 14px;
+        }
+
+        .profile-picture-button:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .listening-history ul,
+        .listening-times ul,
+        .recent-songs ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .listening-history li,
+        .recent-songs li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .listening-history li:hover,
+        .recent-songs li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .listening-history img,
+        .recent-songs img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
+        .song-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .song-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .song-artist,
+        .listen-count,
+        .listen-time {
+            color: var(--secondary-color);
+            font-size: 14px;
+        }
+
+        .listening-times li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        .listening-times li:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .time-slot {
+            font-weight: 500;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--bg-gradient);
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid var(--secondary-color);
+            width: 50%;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .close {
+            color: var(--secondary-color);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: var(--primary-color);
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #image-crop-container {
+            max-width: 100%;
+            max-height: calc(90vh - 200px);
+            overflow: hidden;
+        }
+
+        #image-crop-container img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .user-info {
+                margin-bottom: 10px;
+            }
+
+            .dashboard-content {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 90%;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .dashboard-section {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .timezone-info {
+            color: var(--secondary-color);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .time-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .time-indicator i {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="dashboard-header">
+            <div class="user-info">
+                <div class="user-details">
+                    <h1>Welcome, {{ user['name'] }}!</h1>
+                    <p>{{ user['email'] }}</p>
+                    <p class="timezone-info">
+                        <i class="fas fa-clock"></i>
+                        Showing times in {{ current_timezone }}
+                    </p>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}"
+                style="color: white; background-color: red; padding: 10px 15px; text-decoration: none; border-radius: 5px; transition: background-color 0.3s ease, color 0.3s ease;"
+                onmouseover="this.style.backgroundColor='darkred'; this.style.color='lightyellow';"
+                onmouseout="this.style.backgroundColor='red'; this.style.color='white';">
+                Logout
+            </a>
+
+            <a href="{{ url_for('index') }}"
+                style="color: black; background-color: lightgray; padding: 10px 15px; text-decoration: none; border-radius: 5px; transition: background-color 0.3s ease, color 0.3s ease;"
+                onmouseover="this.style.backgroundColor='gray'; this.style.color='white';"
+                onmouseout="this.style.backgroundColor='lightgray'; this.style.color='black';">
+                Back To Sangeet
+            </a>
+
+        </div>
+
+        <div class="dashboard-content">
+            <div class="dashboard-section">
+                <h2>Profile Information</h2>
+                <div class="profile-picture-section">
+                    <h3>Profile Picture</h3>
+                    <div class="profile-picture-container">
+                        {% if user['profile_pic'] %}
+                        <img src="{{ url_for('static', filename='profile_pics/' + user['profile_pic']) }}"
+                            alt="Profile Picture" id="currentProfilePic">
+                        {% else %}
+                        <div class="default-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        {% endif %}
+                        <div class="profile-picture-overlay">
+                            <button class="profile-picture-button" onclick="openImageUploadModal()">
+                                <i class="fas fa-camera"></i> Change Picture
+                            </button>
+                            {% if user['profile_pic'] %}
+                            <button class="profile-picture-button" onclick="removeProfilePicture()">
+                                <i class="fas fa-trash-alt"></i> Remove
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <form action="{{ url_for('dashboard') }}" method="post">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" value="{{ user['name'] }}" required>
+                    <button type="submit" name="update_profile">Update Profile</button>
+                </form>
+            </div>
+            <!-- Listening History Section -->
+            <div class="dashboard-section">
+
+                <h2>Listening History</h2>
+
+                <!-- Most Listened Songs -->
+                <div class="listening-history">
+                    <h3>Most Listened Songs</h3>
+                    <ul>
+                        {% for song in most_listened_songs %}
+                        <li>
+                            <img src="{{ song['thumbnail'] }}" alt="{{ song['title'] }}">
+                            <div class="song-info">
+                                <span class="song-title">{{ song['title'] }}</span>
+                                <span class="song-artist">{{ song['artist'] }}</span>
+                                <span class="listen-count">Listens: {{ song['count'] }}</span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="listening-times">
+                    <h3>Listening Times</h3>
+                    <ul>
+                        {% for time_slot in listening_times %}
+                        <li>
+                            <span class="time-slot">
+                                <i class="far fa-clock"></i>
+                                {{ time_slot['time_slot'] }}
+                            </span>
+                            <span class="listen-count">Listens: {{ time_slot['listen_count'] }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="recent-songs">
+                    <h3>Recently Listened Songs</h3>
+                    <ul>
+                        {% for song in recently_listened_songs %}
+                        <li>
+                            <img src="{{ song['thumbnail'] }}" alt="{{ song['title'] }}">
+                            <div class="song-info">
+                                <span class="song-title">{{ song['title'] }}</span>
+                                <span class="song-artist">{{ song['artist'] }}</span>
+                                <div class="time-indicator">
+                                    <i class="far fa-clock"></i>
+                                    <span class="listen-time">{{ song['timestamp'] }}</span>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div id="imageUploadModal" class="modal">
+        <div class="modal-content">
+            <h2>Update Profile Picture</h2>
+            <button id="closeModalBtn" class="close-button">&times;</button>
+            <input type="file" id="imageInput" accept="image/*" onchange="loadImage(event)">
+            <div id="image-crop-container"></div>
+            <button id="cropImageBtn" style="display: none;" onclick="cropImage()">Set New Profile Picture</button>
+        </div>
+    </div>
+
+    <script>
+        let cropper;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('imageUploadModal');
+            const closeBtn = document.getElementById('closeModalBtn');
+            const openModalBtn = document.querySelector('.profile-picture-button');
+
+            if (openModalBtn) {
+                openModalBtn.addEventListener('click', function () {
+                    modal.style.display = 'block';
+                });
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeImageUploadModal);
+            }
+
+            // Close modal if clicked outside of modal content
+            window.addEventListener('click', function (event) {
+                if (event.target == modal) {
+                    closeImageUploadModal();
+                }
+            });
+        });
+
+        function openImageUploadModal() {
+            document.getElementById('imageUploadModal').style.display = 'block';
+        }
+
+        function closeImageUploadModal() {
+            const modal = document.getElementById('imageUploadModal');
+            modal.style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            document.getElementById('image-crop-container').innerHTML = '';
+            document.getElementById('imageInput').value = '';
+            document.getElementById('cropImageBtn').style.display = 'none';
+        }
+
+        function loadImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    const container = document.getElementById('image-crop-container');
+                    container.innerHTML = '';
+                    container.appendChild(img);
+
+                    // Calculate the maximum width and height
+                    const maxWidth = Math.min(300, window.innerWidth - 40); // 40px for padding
+                    const maxHeight = Math.min(300, window.innerHeight - 200); // 200px for other elements
+
+                    cropper = new Cropper(img, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        ready: function () {
+                            document.getElementById('cropImageBtn').style.display = 'block';
+                        },
+                        minContainerWidth: maxWidth,
+                        minContainerHeight: maxHeight,
+                        minCropBoxWidth: 50,
+                        minCropBoxHeight: 50,
+                        responsive: true,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        background: false,
+                        autoCropArea: 0.8,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        toggleDragModeOnDblclick: false,
+                    });
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function cropImage() {
+            if (cropper) {
+                canvas = cropper.getCroppedCanvas({
+                    width: 300,
+                    height: 300
+                });
+                canvas.toBlob(function (blob) {
+                    const formData = new FormData();
+                    formData.append('profile_pic', blob, 'profile_pic.png');
+
+                    fetch("/update_profile_pic", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const profileContainer = document.querySelector('.profile-picture-container');
+                                profileContainer.innerHTML = `<img src="${data.image_url}?t=${new Date().getTime()}" alt="Profile Picture" id="currentProfilePic">
+                                <div class="profile-picture-overlay">
+                                    <button class="profile-picture-button" onclick="openImageUploadModal()">
+                                        <i class="fas fa-camera"></i> Change Picture
+                                    </button>
+                                    <button class="profile-picture-button" onclick="removeProfilePicture()">
+                                        <i class="fas fa-trash-alt"></i> Remove
+                                    </button>
+                                </div>`;
+                                closeImageUploadModal();
+                            } else {
+                                alert('Failed to update profile picture. Please try again.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred. Please try again.');
+                        });
+                });
+            }
+        }
+
+        function removeProfilePicture() {
+            if (confirm("Are you sure you want to remove your profile picture?")) {
+                fetch("/remove_profile_pic", {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const profileContainer = document.querySelector('.profile-picture-container');
+                            profileContainer.innerHTML = `
+                            <div class="default-avatar"><i class="fas fa-user"></i></div>
+                            <div class="profile-picture-overlay">
+                                <button class="profile-picture-button" onclick="openImageUploadModal()">
+                                    <i class="fas fa-camera"></i> Change Picture
+                                </button>
+                            </div>`;
+                        } else {
+                            alert('Failed to remove profile picture. Please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
+                    });
+            }
+        }
+    </script>
+</body>
+
+</html>

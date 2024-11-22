@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Secure Login System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: url("/authentication/assets/background") no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Container Styles */
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+
+        /* Logo Styles */
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Typography */
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+            outline: none;
+        }
+
+        /* Button Styles */
+        .button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+        }
+
+        .button:active {
+            transform: translateY(1px);
+        }
+
+        .button.loading {
+            color: transparent;
+            pointer-events: none;
+        }
+
+        .button.loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin: -10px 0 0 -10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Form Options and Links */
+        .form-options {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .form-options a {
+            color: #2196F3;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .form-options a:hover {
+            color: #1976D2;
+            text-decoration: underline;
+        }
+
+        .create-account {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .create-account a {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .create-account a:hover {
+            color: #1976D2;
+            text-decoration: underline;
+        }
+
+        /* Password Toggle */
+        .password-container {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s ease;
+            padding: 5px;
+            z-index: 2;
+        }
+
+        .password-toggle:hover {
+            color: #4CAF50;
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 10;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 14px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        footer a:hover {
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+            color: #e0e0e0;
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: -400px;
+            width: 350px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .notification.show {
+            transform: translateX(-420px);
+        }
+
+        .notification.success {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .notification.error {
+            border-left: 4px solid #f44336;
+        }
+
+        .notification.info {
+            border-left: 4px solid #2196F3;
+        }
+
+        .notification.warning {
+            border-left: 4px solid #ff9800;
+        }
+
+        .notification-content {
+            flex-grow: 1;
+            margin-right: 15px;
+            line-height: 1.5;
+        }
+
+        .notification-close {
+            cursor: pointer;
+            padding: 8px;
+            margin: -8px;
+            color: #666;
+            transition: all 0.2s ease;
+            border-radius: 50%;
+        }
+
+        .notification-close:hover {
+            color: #333;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Animation Keyframes */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                width: 95%;
+            }
+
+            .notification {
+                width: 90%;
+                right: -100%;
+            }
+
+            .notification.show {
+                transform: translateX(-95%);
+            }
+
+            footer {
+                padding: 0 20px;
+            }
+
+            footer a {
+                margin: 0 10px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="/authentication/assets/logo" alt="Logo" class="logo">
+        <h1>Sign in</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="email" id="email" name="email" required placeholder="Email" autocomplete="email">
+            </div>
+            <div class="form-group password-container">
+                <input type="password" id="password" name="password" required placeholder="Password" autocomplete="current-password">
+                <i class="fas fa-eye password-toggle" id="passwordToggle" aria-label="Toggle password visibility"></i>
+            </div>
+            <button type="submit" class="button">Sign In</button>
+        </form>
+        <div class="form-options">
+            <a href="{{ url_for('forgot_password') }}">Forgot password?</a>
+        </div>
+        <p class="create-account">
+            Don't have an account? <a href="{{ url_for('register') }}">Create account</a>
+        </p>
+    </div>
+
+    <footer>
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+        <a href="#">Help</a>
+    </footer>
+
+    <script>
+        // Notification System Class
+        class NotificationSystem {
+            constructor() {
+                this.activeNotification = null;
+                this.timeout = null;
+                this.swipeStartX = null;
+                this.swipeStartY = null;
+            }
+
+            show(message, type = 'info') {
+                // Remove existing notification if any
+                this.dismiss();
+
+                // Create new notification
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <div class="notification-content">${message}</div>
+                    <div class="notification-close">
+                        <i class="fas fa-times"></i>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+                this.activeNotification = notification;
+
+                // Add event listeners
+                this.setupEventListeners(notification);
+
+                // Show notification
+                requestAnimationFrame(() => {
+                    notification.classList.add('show');
+                });
+
+                // Auto dismiss after 6 seconds
+                this.timeout = setTimeout(() => this.dismiss(), 6000);
+            }
+
+            setupEventListeners(notification) {
+                // Close button
+                notification.querySelector('.notification-close').addEventListener('click', () => {
+                    this.dismiss();
+                });
+
+                // Touch events for swipe
+                notification.addEventListener('touchstart', (e) => {
+                    this.swipeStartX = e.touches[0].clientX;
+                    this.swipeStartY = e.touches[0].clientY;
+                });
+
+                notification.addEventListener('touchmove', (e) => {
+                    if (!this.swipeStartX || !this.swipeStartY) return;
+
+                    const diffX = this.swipeStartX - e.touches[0].clientX;
+                    const diffY = Math.abs(this.swipeStartY - e.touches[0].clientY);
+
+                    // Check if horizontal swipe
+                    if (diffX > 50 && diffY < 30) {
+                        this.dismiss();
+                    }
+                });
+
+                notification.addEventListener('touchend', () => {
+                    this.swipeStartX = null;
+                    this.swipeStartY = null;
+                });
+            }
+
+            dismiss() {
+                if (this.activeNotification) {
+                    clearTimeout(this.timeout);
+                    this.activeNotification.classList.remove('show');
+                    setTimeout(() => {
+                        this.activeNotification.remove();
+                        this.activeNotification = null;
+                    }, 300);
+                }
+            }
+        }
+
+        // Initialize notification system
+        const notifications = new NotificationSystem();
+
+        // Form handling
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const button = this.querySelector('.button');
+            const email = this.querySelector('#email').value.trim();
+            const password = this.querySelector('#password').value;
+
+            // Basic validation
+            if (!email || !password) {
+                notifications.show('Please fill in all fields.', 'error');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                notifications.show('Please enter a valid email address.', 'error');
+                return;
+            }
+
+            // Show loading state
+            button.classList.add('loading');
+            
+            try {
+                const response = await fetch('{{ url_for("login") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    notifications.show(data.message, 'success');
+                    // Redirect after showing success message
+                    setTimeout(() => window.location.href = data.redirect, 1000);
+                } else {
+                    notifications.show(data.message, 'error');
+                    button.classList.remove('loading');
+                }
+            } catch (error) {
+                notifications.show('An error occurred. Please try again.', 'error');
+                button.classList.remove('loading');
+            }
+        });
+
+        // Password toggle functionality
+        const passwordToggle = document.getElementById('passwordToggle');
+        const passwordInput = document.getElementById('password');
+
+        passwordToggle.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+            this.classList.add('fade-in');
+            setTimeout(() => this.classList.remove('fade-in'), 300);
+        });
+
+        // Email validation helper
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Prevent form resubmission on page refresh
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+
+        // Handle network status
+        window.addEventListener('online', () => {
+            notifications.show('Connection restored.', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            notifications.show('No internet connection.', 'warning');
+        });
+
+        // Add touch ripple effect to buttons
+        document.querySelectorAll('.button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('div');
+                const rect = button.getBoundingClientRect();
+                
+                ripple.className = 'ripple';
+                ripple.style.cssText = `
+                    position: absolute;
+                    background: rgba(255, 255, 255, 0.7);
+                    border-radius: 50%;
+                    pointer-events: none;
+                    width: 100px;
+                    height: 100px;
+                    left: ${e.clientX - rect.left - 50}px;
+                    top: ${e.clientY - rect.top - 50}px;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                `;
+
+                button.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Add input validation styles
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('invalid', function(e) {
+                e.preventDefault();
+                this.classList.add('invalid');
+                
+                const errorMessage = this.getAttribute('data-error') || 
+                    (this.type === 'email' ? 'Please enter a valid email address.' : 'This field is required.');
+                
+                notifications.show(errorMessage, 'error');
+            });
+
+            input.addEventListener('input', function() {
+                this.classList.remove('invalid');
+            });
+        });
+
+        // Save email for convenience (but never save password)
+        const savedEmail = localStorage.getItem('userEmail');
+        if (savedEmail) {
+            document.getElementById('email').value = savedEmail;
+        }
+
+        document.getElementById('email').addEventListener('change', function() {
+            if (this.value) {
+                localStorage.setItem('userEmail', this.value);
+            }
+        });
+
+        // Add custom styles for autofill
+        const style = document.createElement('style');
+        style.textContent = `
+            input:-webkit-autofill,
+            input:-webkit-autofill:hover,
+            input:-webkit-autofill:focus {
+                -webkit-box-shadow: 0 0 0px 1000px white inset;
+                -webkit-text-fill-color: #333;
+                transition: background-color 5000s ease-in-out 0s;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Add ripple animation
+        const rippleStyle = document.createElement('style');
+        rippleStyle.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(rippleStyle);
+
+        // Add invalid input styles
+        const invalidStyle = document.createElement('style');
+        invalidStyle.textContent = `
+            input.invalid {
+                border-color: #f44336 !important;
+                animation: shake 0.4s ease-in-out;
+            }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(invalidStyle);
+
+        // Initialize focus styles
+        document.querySelectorAll('input').forEach(input => {
+            const wrapper = input.parentElement;
+            
+            input.addEventListener('focus', () => {
+                wrapper.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', () => {
+                wrapper.classList.remove('focused');
+                if (input.value) {
+                    wrapper.classList.add('has-value');
+                } else {
+                    wrapper.classList.remove('has-value');
+                }
+            });
+
+            // Set initial state
+            if (input.value) {
+                wrapper.classList.add('has-value');
+            }
+        });
+
+        // Detect caps lock
+        document.getElementById('password').addEventListener('keyup', function(e) {
+            if (e.getModifierState('CapsLock')) {
+                notifications.show('Caps Lock is on', 'info');
+            }
+        });
+
+        // Handle form submission with keyboard
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
