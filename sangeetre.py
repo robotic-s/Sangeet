@@ -1,7 +1,6 @@
 import db.music_db
 import db.tokens_db
 import db.users_db
-from start import startup
 from mutagen.flac import FLAC
 import requests 
 from flask import Flask , g , jsonify , request , flash , redirect , url_for , session , make_response , render_template , send_file , Response , stream_with_context , abort
@@ -91,7 +90,6 @@ def setup():
     dirc(os.path.join(base_dir , "db"))
     dirc(os.path.join(base_dir , "content"))
 
-setup()
 
 
 # making db setups
@@ -1926,5 +1924,6 @@ def radioprevious_song():
     else:
         return jsonify({'error': 'No previous song found'}), 404
 
+setup()
 app.run(port = os.getenv("port") , host = "0.0.0.0")
 
