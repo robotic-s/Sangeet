@@ -73,7 +73,7 @@ load_dotenv()
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 ytmusic = YTMusic()
 MUSIC_DIR = os.getenv("MUSIC_DIR")
-HOST = os.getenv("HOST")
+HOST = os.getenv("host")
 DEFAULT_ARTWORK_PATH = os.path.join(os.getcwd(), 'static', 'default_artwork.jpg')
 
 #making setup checks
@@ -114,13 +114,13 @@ def urls():
     return url
 @app.before_request
 def restrict_host():
-    if not request.scheme + "://" +  request.host == f"http://127.0.0.1:{os.getenv('port')}":
-        if os.getenv("allowed_sceheme") == "http":
+    if not (request.scheme + "://" + request.host == f"http://127.0.0.1:{os.getenv('port')}" or request.scheme + "://" + request.host == f"{os.getenv('host')}"):
+        if os.getenv("allowed_scheme") == "http":
             expected_host = os.getenv("host")
             expected_scheme = os.getenv("allowed_scheme")
             if request.scheme + "://" +  request.host != expected_host:
                 abort(403 , description = "server url is not valid please go to official server by sangeet or admin")
-        elif os.getenv("allowed_sceheme") == "https":
+        elif os.getenv("allowed_scheme") == "https":
             expected_host = os.getenv("host_https")
             if  request.host != expected_host:
                 abort(403 , description = "server url is not valid please go to official server by sangeet or admin")
@@ -422,15 +422,19 @@ sharesession = s("share" , 1)
 def index():
     if g.user:
         # User is authenticated
+        if request.host == os.getenv('host_https'):
+           host_id = "https://" + os.getenv("host_https")
+        elif request.scheme + "://" +  request.host == os.getenv('host') or request.scheme + "://" +  request.host == f"http://127.0.0.1:{os.getenv('port')}":
+            host_id =  os.getenv("host")
         if "reserve" in session:
             if session["reserve"] == "reserve":
                 session["yes"] = "yes"
                 session.pop("reserve", None)
-                return render_template("index.html", hostid=os.getenv("host"), user=g.user)
+                return render_template("index.html", hostid=host_id, user=g.user)
             else:
                 session["yes"] = "yes"
                 session[sharesession] = s(music_db.lastplay(g.user['id']), 1) 
-                return render_template("index.html", hostid=os.getenv("host"), user=g.user)
+                return render_template("index.html", hostid=host_id, user=g.user)
         else:
             session["yes"] = "yes"
             session[sharesession] = s(music_db.lastplay(g.user['id']), 1)    
@@ -731,7 +735,10 @@ def v3(filename):
 @app.route('/v3/embed/details/sangeet/all/<video_id>')
 def guideemvbedsdd(video_id ):
     video_url = f'https://www.youtube.com/watch?v={video_id}'  # Replace with the actual video URL
-    
+    if request.host == os.getenv('host_https'):
+           host_id = "https://" + os.getenv("host_https")
+    elif request.scheme + "://" +  request.host == os.getenv('host') or request.scheme + "://" +  request.host == f"http://127.0.0.1:{os.getenv('port')}":
+            host_id =  os.getenv("host")
     try:
         # Fetch video details using yt-dlp
         with yt_dlp.YoutubeDL() as ydl:
@@ -743,7 +750,7 @@ def guideemvbedsdd(video_id ):
                 'artist_name': info['uploader'],
             }
             session["yes"] = "yes"
-            return render_template("renderembedall.html", **song_data, video_id=video_id , hostid = os.getenv("host"))
+            return render_template("renderembedall.html", **song_data, video_id=video_id , hostid = host_id)
     except Exception as e:
         return f"Error: {str(e)}"
 
@@ -813,17 +820,10 @@ def get_metadata(filename):
     file_name = os.path.basename(filename)
     name_without_extension = os.path.splitext(file_name)[0]
     thumbnail_url = f"https://img.youtube.com/vi/{name_without_extension}/0.jpg"
-    addr = get_ip()
-    print(request.remote_addr)
-    if request.remote_addr == "127.0.0.1":
-        addr = "http://127.0.0.1:" + request.environ.get('SERVER_PORT')
-    elif request.remote_addr == "localhost":
-        addr = "http://localhost:" + request.environ.get('SERVER_PORT')
-    else:
-        if not addr == None:
-            addr = addr + ":" + request.environ.get('SERVER_PORT')
-        else:
-            addr = "your host!"
+    if request.host == os.getenv('host_https'):
+           host_id = "https://" + os.getenv("host_https")
+    elif request.scheme + "://" +  request.host == os.getenv('host') or request.scheme + "://" +  request.host == f"http://127.0.0.1:{os.getenv('port')}":
+            host_id =  os.getenv("host")
     metadata = {
         'filename': filename,
         'title': audio.get('title', [filename])[0],
@@ -838,7 +838,7 @@ def get_metadata(filename):
         'duration': audio.info.length,
         'thumbnail': thumbnail_url,
         'download' : f'/download/"{filename}"',
-        'share' : f'{HOST}/sangeet/share/music/"{name_without_extension}"'
+        'share' : f'{host_id}/sangeet/share/music/"{name_without_extension}"'
     }
     return jsonify(metadata)
 
